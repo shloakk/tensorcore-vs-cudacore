@@ -1,2 +1,6 @@
 # tensorcore-vs-cudacore
-Comparing the performance difference between a “traditional CUDA-core” GEMM path and a “modern Tensor Core” GEMM path using a simple fully connected layer
+Comparing the performance difference between a “traditional CUDA-core” GEMM path and a “modern Tensor Core” GEMM path using a simple fully connected layer in PyTorch.
+
+
+- Basic FC GEMM script created
+- Uses a single matrix multiplication: `Y = X @ W`
