@@ -43,13 +43,22 @@ def benchmark_once(
 
 
 def main() -> None:
-    B, K, N = 128, 512, 512
+    sizes = [
+        (128, 512, 512),
+        (128, 1024, 1024),
+        (256, 1024, 1024),
+        (256, 2048, 2048),
+        (512, 2048, 2048),
+        (1024, 4096, 4096),
+    ]
 
-    baseline_ms = benchmark_once(B, K, N, use_tf32=False)
-    tf32_ms = benchmark_once(B, K, N, use_tf32=True)
+    for B, K, N in sizes:
+        baseline_ms = benchmark_once(B, K, N, use_tf32=False)
+        tf32_ms = benchmark_once(B, K, N, use_tf32=True)
 
-    print(f"Baseline avg latency (ms): {baseline_ms:.4f}")
-    print(f"TF32 avg latency (ms): {tf32_ms:.4f}")
+        print(f"B={B}, K={K}, N={N}")
+        print(f"  Baseline avg latency (ms): {baseline_ms:.4f}")
+        print(f"  TF32 avg latency (ms): {tf32_ms:.4f}")
 
 
 if __name__ == "__main__":
