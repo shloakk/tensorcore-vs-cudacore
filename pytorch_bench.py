@@ -1,3 +1,4 @@
+import pandas as pd
 import torch
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -58,16 +59,33 @@ def main() -> None:
         (1024, 4096, 4096),
     ]
 
+    rows = []
+
     for B, K, N in sizes:
         baseline_ms = benchmark_once(B, K, N, use_tf32=False)
         tf32_ms = benchmark_once(B, K, N, use_tf32=True)
 
         baseline_tflops = tflops(B, K, N, baseline_ms)
         tf32_tflops = tflops(B, K, N, tf32_ms)
+        speedup = baseline_ms / tf32_ms
 
-        print(f"B={B}, K={K}, N={N}")
-        print(f"  Baseline latency (ms): {baseline_ms:.4f}, TFLOPS: {baseline_tflops:.4f}")
-        print(f"  TF32 latency (ms): {tf32_ms:.4f}, TFLOPS: {tf32_tflops:.4f}")
+        rows.append(
+            {
+                "B": B,
+                "K": K,
+                "N": N,
+                "baseline_ms": baseline_ms,
+                "tf32_ms": tf32_ms,
+                "baseline_tflops": baseline_tflops,
+                "tf32_tflops": tf32_tflops,
+                "speedup": speedup,
+            }
+        )
+
+    df = pd.DataFrame(rows)
+    print(df)
+    df.to_csv("results_pytorch.csv", index=False)
+    print("Saved results to results_pytorch.csv")
 
 
 if __name__ == "__main__":
