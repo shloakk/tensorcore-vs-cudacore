@@ -9,7 +9,14 @@ def set_tf32(enabled: bool) -> None:
         torch.backends.cudnn.allow_tf32 = enabled
 
 
-def benchmark_once(B: int, K: int, N: int, use_tf32: bool, iters: int = 100) -> float:
+def benchmark_once(
+    B: int,
+    K: int,
+    N: int,
+    use_tf32: bool,
+    warmup: int = 20,
+    iters: int = 100,
+) -> float:
     if device != "cuda":
         raise RuntimeError("This benchmark must run on a CUDA GPU.")
 
@@ -17,6 +24,10 @@ def benchmark_once(B: int, K: int, N: int, use_tf32: bool, iters: int = 100) -> 
 
     x = torch.randn(B, K, device=device, dtype=torch.float32)
     w = torch.randn(K, N, device=device, dtype=torch.float32)
+
+    for _ in range(warmup):
+        _ = x @ w
+    torch.cuda.synchronize()
 
     start = torch.cuda.Event(enable_timing=True)
     end = torch.cuda.Event(enable_timing=True)
