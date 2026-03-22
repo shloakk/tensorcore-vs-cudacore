@@ -9,6 +9,12 @@ def set_tf32(enabled: bool) -> None:
         torch.backends.cudnn.allow_tf32 = enabled
 
 
+def tflops(B: int, K: int, N: int, latency_ms: float) -> float:
+    flops = 2.0 * B * K * N
+    seconds = latency_ms / 1000.0
+    return flops / seconds / 1e12
+
+
 def benchmark_once(
     B: int,
     K: int,
@@ -56,9 +62,12 @@ def main() -> None:
         baseline_ms = benchmark_once(B, K, N, use_tf32=False)
         tf32_ms = benchmark_once(B, K, N, use_tf32=True)
 
+        baseline_tflops = tflops(B, K, N, baseline_ms)
+        tf32_tflops = tflops(B, K, N, tf32_ms)
+
         print(f"B={B}, K={K}, N={N}")
-        print(f"  Baseline avg latency (ms): {baseline_ms:.4f}")
-        print(f"  TF32 avg latency (ms): {tf32_ms:.4f}")
+        print(f"  Baseline latency (ms): {baseline_ms:.4f}, TFLOPS: {baseline_tflops:.4f}")
+        print(f"  TF32 latency (ms): {tf32_ms:.4f}, TFLOPS: {tf32_tflops:.4f}")
 
 
 if __name__ == "__main__":
