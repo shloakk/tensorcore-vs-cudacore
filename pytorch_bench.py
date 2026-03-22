@@ -21,8 +21,11 @@ def main() -> None:
     B, K, N = 128, 512, 512
 
     baseline = run_once(B, K, N, use_tf32=False)
-    print("Ran FP32 baseline with TF32 disabled.")
-    print(f"Output shape: {tuple(baseline.shape)}")
+    tensor_core = run_once(B, K, N, use_tf32=True)
+
+    print("Ran both benchmark modes:")
+    print(f"Baseline shape: {tuple(baseline.shape)}")
+    print(f"TF32 shape: {tuple(tensor_core.shape)}")
     print(f"Device: {device}")
 
 
