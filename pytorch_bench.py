@@ -1,5 +1,6 @@
 import pandas as pd
 import torch
+import torch.nn as nn
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -30,10 +31,11 @@ def benchmark_once(
     set_tf32(use_tf32)
 
     x = torch.randn(B, K, device=device, dtype=torch.float32)
-    w = torch.randn(K, N, device=device, dtype=torch.float32)
+    fc = nn.Linear(K, N, bias=False, device=device, dtype=torch.float32)
+    fc.eval()
 
     for _ in range(warmup):
-        _ = x @ w
+        _ = fc(x)
     torch.cuda.synchronize()
 
     start = torch.cuda.Event(enable_timing=True)
@@ -41,7 +43,7 @@ def benchmark_once(
 
     start.record()
     for _ in range(iters):
-        _ = x @ w
+        _ = fc(x)
     end.record()
 
     torch.cuda.synchronize()
